@@ -1,0 +1,46 @@
+version: "3.9" #
+services:
+  mysql_db:
+    image: mysql:5.7
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: new_base
+      MYSQL_USER: user
+      MYSQL_PASSWORD: s3kreee7
+      MYSQL_ALLOW_EMPTY_PASSWORD: yes
+    ports:
+      - 3306:3306
+    volumes:
+      - db:/var/lib/mysql
+    restart: always
+  backend:
+    image: node:19-alpine3.15
+    working_dir: /code/backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/code/backend
+    container_name: backend
+    command: npm run dev
+    environment:
+      DB_HOST: "mysql_db"
+      PORT: 5000
+    depends_on:
+      - mysql_db
+    restart: always
+  frontend:
+    image: node:19-alpine3.15
+    working_dir: /code/frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/code/frontend
+    container_name: frontend
+    command: npm run dev
+    depends_on:
+      - mysql_db
+      - backend
+    restart: always
+volumes:
+  db:
